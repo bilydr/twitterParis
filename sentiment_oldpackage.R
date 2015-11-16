@@ -4,9 +4,15 @@
 ## https://www.credera.com/blog/business-intelligence/twitter-analytics-using-r-part-2-create-word-cloud/
 ## http://stackoverflow.com/questions/18153504/removing-non-english-text-from-corpus-in-r-using-tm
 
+
+# package setup-----------------------------------------------------------------
+# old package 'sentiment' used - currently not on CRAN but can be installed from archive
+require(devtools)
+install_url("http://cran.r-project.org/src/contrib/Archive/Rstem/Rstem_0.4-1.tar.gz")
+install_url("http://cran.r-project.org/src/contrib/Archive/sentiment/sentiment_0.2.tar.gz")
+
 library(twitteR)
 library(RCurl)
-# library(RJSONIO)
 library(stringr)
 library(tm)
 library(wordcloud)
@@ -68,7 +74,7 @@ removeNonASCII <- function(text){
 # Get Data ----------------------------------------------------------------
 
 keyword <- '#ParisAttacks'
-n <- 100
+n <- 30
 
 # get some tweets
 tweets <- searchTwitter(keyword, n, lang= "en")

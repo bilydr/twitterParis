@@ -3,11 +3,18 @@
 ## http://colinpriest.com/2015/07/04/tutorial-using-r-and-twitter-to-analyse-consumer-sentiment/
 ## https://www.credera.com/blog/business-intelligence/twitter-analytics-using-r-part-2-create-word-cloud/
 ## http://stackoverflow.com/questions/18153504/removing-non-english-text-from-corpus-in-r-using-tm
-## http://shiny.rstudio.com/gallery/word-cloud.html
+
+# package setup -----------------------------------------------------------
+
+# another package 'sentiment' from github - newer than the archived one on CRAN
+# but it doesn't produce 7 emotions - only positive/negative/neutral sentiments
+
+# require(devtools)
+# install_github('sentiment140', 'okugami79')
+
 
 library(twitteR)
 library(RCurl)
-library(RJSONIO)
 library(stringr)
 library(tm)
 library(wordcloud)
@@ -69,27 +76,23 @@ removeNonASCII <- function(text){
 # Get Data ----------------------------------------------------------------
 
 keyword <- '#ParisAttacks'
-n <- 100
+n <- 1000
 
 # get some tweets
-tweets <- searchTwitter(keyword, n, lang= "fr")
+tweets <- searchTwitter(keyword, n, lang= "en")
 # get text 
 tweet_txt <- sapply(tweets, function(x) x$getText())
 
 # clean text
 tweet_clean <- clean.text(tweet_txt)
 tweet_clean <- removeNonASCII(tweet_clean)
+tweet_clean <- removeWords(tweet_clean, stopwords("SMART"))
 corpus.text <- Corpus(VectorSource(tweet_clean))
 tweet_num <- length(tweet_clean)
 
 # data frame (text, sentiment)
-tweet_df <- data.frame(text = tweet_clean, sentiment = rep("", tweet_num), 
-                       stringsAsFactors=FALSE)
-
-
-# get Sentiment
-tweet_df$sentiment <- classify_emotion(tweet_clean)[,7]
-
+tweet_df <- sentiment(tweet_clean)
+colnames(tweet_df) <- c('text', 'sentiment', 'lang')
 
 # delete rows with no sentiment
 tweet_df  <-na.omit(tweet_df)
@@ -115,7 +118,7 @@ for (i in 1:nemo)
 
 # remove stopwords
 
-emo.docs <- removeWords(emo.docs, stopwords("english"))
+emo.docs <- removeWords(emo.docs, stopwords("SMART"))
 # emo.docs <- removeWords(emo.docs, stopwords("french"))
 corpus.senti <- Corpus(VectorSource(emo.docs))
 tdm <- TermDocumentMatrix(corpus.senti)
